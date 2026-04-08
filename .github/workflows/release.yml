@@ -84,8 +84,25 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           New-Item -ItemType Directory -Path package -Force
+
+          if (!(Test-Path "build/Release/cremniy.exe")) {
+            throw "build/Release/cremniy.exe was not produced"
+          }
+
           Copy-Item build/Release/cremniy.exe package/
           windeployqt package/cremniy.exe
+
+          Write-Host "Qt6_DIR: $env:Qt6_DIR"
+          Write-Host "Contents of package:"
+          Get-ChildItem package -Force
+
+          if (Test-Path "package/styles") {
+            Write-Host "Contents of package/styles:"
+            Get-ChildItem package/styles -Force
+          } else {
+            Write-Host "package/styles not found"
+          }
+
           Compress-Archive -Path package/* -DestinationPath ${{ matrix.artifact_name }}.zip
 
       - name: Package (macOS)
